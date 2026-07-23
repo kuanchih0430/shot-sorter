@@ -1,8 +1,6 @@
 # shot-sorter
 
-Event-driven auto-organizer for macOS screenshots and screen recordings.
-Built on `launchd` + `WatchPaths` — zero polling, zero resident processes,
-near-zero resource usage when idle.
+Automatically sorts macOS screenshots and screen recordings into dated folders with clean English filenames.
 
 macOS saves captures with Chinese default names like
 `截圖 2026-07-23 下午4.20.18.png` and dumps them all into one folder.
