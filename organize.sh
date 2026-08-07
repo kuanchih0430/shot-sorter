@@ -9,8 +9,8 @@
 # Conflicts get auto-incremented _2, _3, ...
 # All actions logged to $SRC/organize.log
 
-SRC="/Users/angus/screen_recording"
-LOG="$SRC/organize.log"
+SRC="${SRC:-/Users/angus/screen_recording}"
+LOG="${LOG:-$SRC/organize.log}"
 
 cd "$SRC" || exit 1
 
@@ -51,7 +51,7 @@ safe_move() {
 process() {
     local prefix="$1" outdir="$2" ext="$3"
     local f date t month
-    for f in "$prefix "*."$ext"; do
+    for f in "$prefix "*."$ext" [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\ [0-9][0-9]-[0-9][0-9]-[0-9][0-9]."$ext"; do
         [ -e "$f" ] || continue
 
         # Skip files modified in the last 5 seconds (may still be writing)
@@ -63,9 +63,15 @@ process() {
             continue
         fi
 
-        if [[ "$f" =~ ([0-9]{4}-[0-9]{2}-[0-9]{2})\ (凌晨|上午|中午|下午|晚上)([0-9]{1,2})\.([0-9]{2})\.([0-9]{2}) ]]; then
+        if [[ "$f" =~ ([0-9]{4}-[0-9]{2}-[0-9]{2})[[:space:]](凌晨|上午|中午|下午|晚上)([0-9]{1,2})\.([0-9]{2})\.([0-9]{2}) ]]; then
             date="${BASH_REMATCH[1]}"
             t=$(to_24h "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}" "${BASH_REMATCH[4]}" "${BASH_REMATCH[5]}")
+            month="${date:0:7}"
+            mkdir -p "$outdir/$month"
+            safe_move "$f" "$outdir/$month" "${date}_${t}" "$ext"
+        elif [[ "$f" =~ ([0-9]{4}-[0-9]{2}-[0-9]{2})[[:space:]]([0-9]{2})-([0-9]{2})-([0-9]{2}) ]]; then
+            date="${BASH_REMATCH[1]}"
+            t="${BASH_REMATCH[2]}-${BASH_REMATCH[3]}-${BASH_REMATCH[4]}"
             month="${date:0:7}"
             mkdir -p "$outdir/$month"
             safe_move "$f" "$outdir/$month" "${date}_${t}" "$ext"
